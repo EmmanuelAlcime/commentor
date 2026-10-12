@@ -1,23 +1,31 @@
 import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ViewTransition } from "react";
+import { type ReactNode, Suspense, ViewTransition } from "react";
 import { getPostBySlug } from "@/features/posts/di";
 import { PostNotFoundError } from "@/features/posts/domain/errors";
 import { postImageTransitionName } from "@/features/posts/presentation/transitions";
 import { Breadcrumbs } from "@/shared/presentation/components/ui/Breadcrumbs";
+import { PostLikes, PostLikesSkeleton } from "./PostLikes";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" });
 
-export async function PostDetail({ slug }: { slug: string }) {
+// The post itself is the same for everyone, so it is cached; likes and comments depend on the viewer and are not
+async function findPost(slug: string) {
     "use cache";
     cacheLife("hours");
     cacheTag("posts", `post:${slug}`);
 
-    const post = await getPostBySlug(slug).catch((error: unknown) => {
-        if (error instanceof PostNotFoundError) notFound();
+    return getPostBySlug(slug).catch((error: unknown) => {
+        if (error instanceof PostNotFoundError) return null;
         throw error;
     });
+}
+
+// `children` receives the post id so the page can add other features (such as comments) below the post
+export async function PostDetail({ slug, children }: { slug: string; children?: (postId: number) => ReactNode }) {
+    const post = await findPost(slug);
+    if (!post) notFound();
 
     const title = post.title ?? "Untitled post";
 
@@ -45,6 +53,12 @@ export async function PostDetail({ slug }: { slug: string }) {
             {post.content && (
                 <p className="mt-8 text-lg leading-8 text-zinc-700 dark:text-zinc-300">{post.content}</p>
             )}
+            <div className="mt-8 flex items-center border-t border-zinc-200 pt-6 dark:border-zinc-800">
+                <Suspense fallback={<PostLikesSkeleton />}>
+                    <PostLikes postId={post.id} />
+                </Suspense>
+            </div>
+            {children?.(post.id)}
         </article>
     );
 }
