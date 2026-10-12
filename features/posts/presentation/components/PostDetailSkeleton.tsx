@@ -8,6 +8,7 @@ export function PostDetailSkeleton() {
             aria-label="Loading post"
             className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 lg:px-8"
         >
+            <Skeleton className="mb-8 h-5 w-56" />
             <Skeleton className="h-5 w-40" />
             <Skeleton className="mt-3 h-10 w-4/5" />
             <Skeleton className="mt-8 aspect-[2/1] rounded-xl" />

@@ -5,6 +5,7 @@ import { ViewTransition } from "react";
 import { getPostBySlug } from "@/features/posts/di";
 import { PostNotFoundError } from "@/features/posts/domain/errors";
 import { postImageTransitionName } from "@/features/posts/presentation/transitions";
+import { Breadcrumbs } from "@/shared/presentation/components/ui/Breadcrumbs";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" });
 
@@ -18,8 +19,11 @@ export async function PostDetail({ slug }: { slug: string }) {
         throw error;
     });
 
+    const title = post.title ?? "Untitled post";
+
     return (
         <article className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+            <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: title }]} className="mb-8" />
             {post.createdAt && (
                 <time
                     dateTime={post.createdAt.toISOString()}
@@ -29,7 +33,7 @@ export async function PostDetail({ slug }: { slug: string }) {
                 </time>
             )}
             <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-                {post.title ?? "Untitled post"}
+                {title}
             </h1>
             {post.image && (
                 <ViewTransition name={postImageTransitionName(post.id)} share="morph" default="none">
