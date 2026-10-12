@@ -9,7 +9,8 @@ Built with Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Drizzl
 - **Posts:** paginated list on the home page, detail page at `/<slug>` with image, breadcrumbs and a shared-element transition from the list.
 - **Likes:** signed-in users can like and unlike posts and comments.
 - **Comments:** create, edit and delete your own comments, reply to any comment (replies nest without limit), sort the thread.
-- **Auth:** register and log in with email and password at `/register` and `/login`. Sessions are cookie based and handled by Better Auth under `/api/auth/*`.
+- **Auth:** register and log in with email and password at `/register` and `/login`. Registration requires accepting the user agreement at `/terms`. Sessions are cookie based and handled by Better Auth under `/api/auth/*`.
+- **Profile:** `/profile` shows your comment history; `/profile/settings` lets you upload or remove a profile picture, change your name, email and password, and delete your account (comments, likes and picture go with it). Pictures are stored in the database and served from `/api/avatars/<userId>`.
 - **Responsive layout:** header with user menu, mobile hamburger menu, loading skeletons on every data-driven page.
 
 ## Architecture
@@ -30,6 +31,7 @@ features/
   auth/                   # Register, sign in, sign out, current user
   comments/               # Threaded comments, edits, likes
   posts/                  # Post listing, detail, likes
+  profile/                # Comment history, profile picture, credentials, account deletion
   users/                  # Legacy seeded users (comment authors from the seed script)
 shared/                   # Header, footer, UI primitives, pagination and error types
 lib/                      # Better Auth server and client config
