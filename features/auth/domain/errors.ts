@@ -1,4 +1,4 @@
-export type RegistrationField = 'name' | 'email' | 'password' | 'confirmPassword';
+export type RegistrationField = 'name' | 'email' | 'password' | 'confirmPassword' | 'acceptTerms';
 export type RegistrationFieldErrors = Partial<Record<RegistrationField, string>>;
 
 export class InvalidRegistrationError extends Error {

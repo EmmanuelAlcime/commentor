@@ -6,9 +6,12 @@ import { toAuthError, toAuthUser } from './auth.mapper';
 
 // Session cookies are written by the nextCookies plugin, so these must run in a server action or route handler
 export class BetterAuthRepository implements AuthRepository {
-    async register({ name, email, password }: Registration): Promise<AuthUser> {
+    async register({ name, email, password, termsAcceptedAt }: Registration): Promise<AuthUser> {
         try {
-            const { user } = await auth.api.signUpEmail({ body: { name, email, password }, headers: await headers() });
+            const { user } = await auth.api.signUpEmail({
+                body: { name, email, password, termsAcceptedAt },
+                headers: await headers(),
+            });
             return toAuthUser(user);
         } catch (error) {
             throw toAuthError(error, email);

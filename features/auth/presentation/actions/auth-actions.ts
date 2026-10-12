@@ -35,7 +35,14 @@ export async function registerAction(_previous: AuthFormState, formData: FormDat
     const email = field(formData, 'email');
 
     try {
-        await registerUser({ name, email, password: field(formData, 'password'), confirmPassword: field(formData, 'confirmPassword') });
+        await registerUser({
+            name,
+            email,
+            password: field(formData, 'password'),
+            confirmPassword: field(formData, 'confirmPassword'),
+            // An unchecked checkbox is simply absent from the form data
+            acceptTerms: field(formData, 'acceptTerms') === 'on',
+        });
     } catch (error) {
         if (error instanceof InvalidRegistrationError) {
             return { fieldErrors: error.fieldErrors, values: { name, email } };

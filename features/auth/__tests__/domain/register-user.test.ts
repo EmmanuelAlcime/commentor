@@ -3,8 +3,16 @@ import { EmailAlreadyRegisteredError, InvalidRegistrationError } from '@/feature
 import { RegisterUser } from '@/features/auth/domain/use-cases/register-user';
 import { InMemoryAuthRepository, makeAuthUser } from './fake-auth-repository';
 
-const valid = { name: 'Jane Doe', email: 'jane@example.com', password: 'correct-horse', confirmPassword: 'correct-horse' };
-const stored = { name: 'Jane Doe', email: 'jane@example.com', password: 'correct-horse' };
+const valid = {
+    name: 'Jane Doe',
+    email: 'jane@example.com',
+    password: 'correct-horse',
+    confirmPassword: 'correct-horse',
+    acceptTerms: true,
+};
+const acceptedAt = new Date('2026-10-12T10:00:00Z');
+const stored = { name: 'Jane Doe', email: 'jane@example.com', password: 'correct-horse', termsAcceptedAt: acceptedAt };
+const now = () => acceptedAt;
 
 describe('RegisterUser', () => {
     it('registers the user and signs them in', async () => {
@@ -17,9 +25,27 @@ describe('RegisterUser', () => {
 
     it('trims the name and normalizes the email before registering', async () => {
         const repository = new InMemoryAuthRepository();
-        await new RegisterUser(repository).execute({ ...valid, name: '  Jane Doe ', email: ' Jane@Example.COM ' });
+        await new RegisterUser(repository, now).execute({ ...valid, name: '  Jane Doe ', email: ' Jane@Example.COM ' });
 
         expect(repository.registrations).toEqual([stored]);
+    });
+
+    it('records when the user agreement was accepted', async () => {
+        const repository = new InMemoryAuthRepository();
+        await new RegisterUser(repository, now).execute(valid);
+
+        expect(repository.registrations[0].termsAcceptedAt).toEqual(acceptedAt);
+    });
+
+    it('rejects registration without accepting the user agreement', async () => {
+        const repository = new InMemoryAuthRepository();
+        const error = await new RegisterUser(repository).execute({ ...valid, acceptTerms: false }).catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(InvalidRegistrationError);
+        expect((error as InvalidRegistrationError).fieldErrors).toEqual({
+            acceptTerms: 'You must accept the user agreement to create an account',
+        });
+        expect(repository.registrations).toEqual([]);
     });
 
     it('does not trim the password', async () => {
@@ -49,7 +75,7 @@ describe('RegisterUser', () => {
 
     it('reports every invalid field at once', async () => {
         const error = await new RegisterUser(new InMemoryAuthRepository())
-            .execute({ name: '', email: 'nope', password: '', confirmPassword: 'x' })
+            .execute({ name: '', email: 'nope', password: '', confirmPassword: 'x', acceptTerms: false })
             .catch((e: unknown) => e);
 
         expect((error as InvalidRegistrationError).fieldErrors).toEqual({
@@ -57,6 +83,7 @@ describe('RegisterUser', () => {
             email: 'Enter a valid email address',
             password: 'Password must be at least 8 characters',
             confirmPassword: 'Passwords do not match',
+            acceptTerms: 'You must accept the user agreement to create an account',
         });
     });
 

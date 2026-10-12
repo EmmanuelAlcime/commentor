@@ -19,6 +19,8 @@ export const user = mysqlTable("user", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  // When the user accepted the user agreement at sign-up; null for accounts created before it existed
+  termsAcceptedAt: timestamp("terms_accepted_at", { fsp: 3 }),
 });
 
 export const session = mysqlTable(
