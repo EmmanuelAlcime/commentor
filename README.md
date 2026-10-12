@@ -54,7 +54,7 @@ npm install
 
 ### 2. Configure environment variables
 
-Create a `.env.local` file in the project root with the variables below (it is gitignored, so each developer keeps their own):
+Create a `.env.example` file in the project root with the variables below (it is gitignored, so each developer keeps their own):
 
 ```dotenv
 DATABASE_HOST=localhost
@@ -77,14 +77,14 @@ BETTER_AUTH_URL=http://localhost:3000
 
 The port is hard-coded to 3306 in `drizzle/src/db/index.ts` and `drizzle.config.ts`.
 
-**Which file is read:** Next.js loads `.env.local` on its own. The CLI scripts (`drizzle-kit` and `npm run db:seed`) load variables through `dotenv/config`, which only reads `.env` by default. Either keep a `.env` with the same values, or point dotenv at the local file as shown in the commands below. All `.env*` files are gitignored.
+**Which file is read:** Next.js loads `.env.example` on its own. The CLI scripts (`drizzle-kit` and `npm run db:seed`) load variables through `dotenv/config`, which only reads `.env` by default. Either keep a `.env` with the same values, or point dotenv at the local file as shown in the commands below. All `.env*` files are gitignored.
 
 ### 3. Create the database schema
 
 The first migration is a baseline no-op, so on a fresh database push the schema directly from the Drizzle definitions:
 
 ```bash
-DOTENV_CONFIG_PATH=.env.local npx drizzle-kit push
+DOTENV_CONFIG_PATH=.env.example npx drizzle-kit push
 ```
 
 This creates the `users`, `post`, `comments`, `post_like` and `comment_like` tables plus the Better Auth tables (`user`, `session`, `account`, `verification`).
@@ -92,13 +92,13 @@ This creates the `users`, `post`, `comments`, `post_like` and `comment_like` tab
 If you already have a database created before the likes-and-comments work, apply the pending migration instead:
 
 ```bash
-DOTENV_CONFIG_PATH=.env.local npx drizzle-kit migrate
+DOTENV_CONFIG_PATH=.env.example npx drizzle-kit migrate
 ```
 
 ### 4. Seed sample data (optional)
 
 ```bash
-DOTENV_CONFIG_PATH=.env.local npm run db:seed
+DOTENV_CONFIG_PATH=.env.example npm run db:seed
 ```
 
 Seeds 100 users, 100 posts and 200 comments with deterministic data. The script clears the `comments`, `post` and `users` tables first, so do not run it against data you want to keep. Seeded users live in the legacy `users` table and cannot log in; register an account through the UI to like or comment.

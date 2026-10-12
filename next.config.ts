@@ -7,6 +7,12 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [new URL("https://picsum.photos/seed/**")],
   },
+  experimental: {
+    serverActions: {
+      // Profile pictures are capped at 2 MB in the domain; the rest covers multipart overhead
+      bodySizeLimit: "3mb",
+    },
+  },
   turbopack: {
     rules: {
       "*.css": {
