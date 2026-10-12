@@ -6,6 +6,6 @@ export default defineConfig({
         alias: { '@': fileURLToPath(new URL('.', import.meta.url)) },
     },
     test: {
-        include: ['features/**/*.test.ts', 'shared/**/*.test.ts'],
+        include: ['features/**/*.test.ts', 'shared/**/*.test.ts', 'drizzle/**/*.test.ts'],
     },
 });
