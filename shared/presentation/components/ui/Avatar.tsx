@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 // Initials on a colour picked from the name, so the same person always gets the same colour
 const colors = [
     "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300",
@@ -17,7 +19,29 @@ export function initials(name: string): string {
 
 const colorFor = (name: string) => colors[[...name].reduce((sum, char) => sum + char.charCodeAt(0), 0) % colors.length];
 
-export function Avatar({ name, className = "size-9 text-sm" }: { name: string; className?: string }) {
+type Props = {
+    name: string;
+    // Profile picture URL; falls back to initials when missing
+    src?: string | null;
+    className?: string;
+};
+
+export function Avatar({ name, src, className = "size-9 text-sm" }: Props) {
+    if (src) {
+        // Pictures are served by this app and already sized, so they skip the image optimizer
+        return (
+            <Image
+                src={src}
+                alt=""
+                aria-hidden="true"
+                width={96}
+                height={96}
+                unoptimized
+                className={`shrink-0 select-none rounded-full object-cover ${className}`}
+            />
+        );
+    }
+
     return (
         <span
             aria-hidden="true"

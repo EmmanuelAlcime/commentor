@@ -63,7 +63,7 @@ export async function CommentSection({ postId, searchParams }: { postId: number;
             <div className="mt-6">
                 {user ? (
                     <div className="flex gap-3">
-                        <Avatar name={user.name} className="size-10 text-sm" />
+                        <Avatar name={user.name} src={user.image} className="size-10 text-sm" />
                         <CommentForm
                             action={createCommentAction.bind(null, postId)}
                             label="Add a comment"

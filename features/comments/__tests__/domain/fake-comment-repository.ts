@@ -1,11 +1,17 @@
-import type { Comment, CommentView } from '@/features/comments/domain/entities/comment';
+import type { Comment, CommentHistoryItem, CommentView } from '@/features/comments/domain/entities/comment';
 import type { CommentRepository, NewComment } from '@/features/comments/domain/repositories/comment-repository';
+
+type FakePost = { id: number; title: string | null; slug: string | null };
 
 type Options = {
     // Posts that exist, for postExists()
     postIds?: number[];
+    // Post details for findHistoryByAuthorId(); posts listed here also count as existing
+    posts?: FakePost[];
     // Display names for registered authors, keyed by authorId
     authorNames?: Record<string, string>;
+    // Profile picture URLs for registered authors, keyed by authorId
+    authorImages?: Record<string, string>;
 };
 
 const likeKey = (commentId: number, userId: string) => `${commentId}:${userId}`;
@@ -13,13 +19,24 @@ const likeKey = (commentId: number, userId: string) => `${commentId}:${userId}`;
 export class InMemoryCommentRepository implements CommentRepository {
     readonly likes = new Set<string>();
     private readonly postIds: Set<number>;
+    private readonly posts: FakePost[];
     private readonly authorNames: Record<string, string>;
+    private readonly authorImages: Record<string, string>;
     private nextId: number;
 
-    constructor(readonly comments: Comment[] = [], { postIds = [1], authorNames = {} }: Options = {}) {
-        this.postIds = new Set(postIds);
+    constructor(
+        readonly comments: Comment[] = [],
+        { postIds = [1], posts = [], authorNames = {}, authorImages = {} }: Options = {},
+    ) {
+        this.postIds = new Set([...postIds, ...posts.map((post) => post.id)]);
+        this.posts = posts;
         this.authorNames = authorNames;
+        this.authorImages = authorImages;
         this.nextId = Math.max(0, ...comments.map((comment) => comment.id)) + 1;
+    }
+
+    private likeCount(commentId: number): number {
+        return [...this.likes].filter((key) => key.startsWith(`${commentId}:`)).length;
     }
 
     async findById(id: number): Promise<Comment | null> {
@@ -30,13 +47,30 @@ export class InMemoryCommentRepository implements CommentRepository {
         return this.comments.filter((comment) => comment.userId === userId);
     }
 
+    async findHistoryByAuthorId(authorId: string): Promise<CommentHistoryItem[]> {
+        const time = (comment: Comment) => comment.createdAt?.getTime() ?? 0;
+        return this.comments
+            .filter((comment) => comment.authorId === authorId)
+            .sort((a, b) => time(b) - time(a) || b.id - a.id)
+            .map((comment) => {
+                const post = this.posts.find((candidate) => candidate.id === comment.postId);
+                return {
+                    ...comment,
+                    postTitle: post?.title ?? null,
+                    postSlug: post?.slug ?? null,
+                    likeCount: this.likeCount(comment.id),
+                };
+            });
+    }
+
     async findViewsByPostId(postId: number, viewerId: string | null): Promise<CommentView[]> {
         return this.comments
             .filter((comment) => comment.postId === postId)
             .map((comment) => ({
                 ...comment,
                 authorName: (comment.authorId && this.authorNames[comment.authorId]) || 'Seeded user',
-                likeCount: [...this.likes].filter((key) => key.startsWith(`${comment.id}:`)).length,
+                authorImage: (comment.authorId && this.authorImages[comment.authorId]) || null,
+                likeCount: this.likeCount(comment.id),
                 likedByViewer: viewerId !== null && this.likes.has(likeKey(comment.id, viewerId)),
             }));
     }
@@ -99,6 +133,7 @@ export const makeComment = (overrides: Partial<Comment> = {}): Comment => ({
 export const makeCommentView = (overrides: Partial<CommentView> = {}): CommentView => ({
     ...makeComment(),
     authorName: 'Ada Lovelace',
+    authorImage: null,
     likeCount: 0,
     likedByViewer: false,
     ...overrides,

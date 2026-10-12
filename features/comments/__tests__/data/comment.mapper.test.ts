@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { type CommentViewRow, toComment, toCommentView, toStoredDate, UNKNOWN_AUTHOR } from '@/features/comments/data/comment.mapper';
+import {
+    type CommentHistoryRow,
+    type CommentViewRow,
+    toComment,
+    toCommentHistoryItem,
+    toCommentView,
+    toStoredDate,
+    UNKNOWN_AUTHOR,
+} from '@/features/comments/data/comment.mapper';
 
 const row = {
     id: 1,
@@ -15,6 +23,7 @@ const row = {
 const viewRow = (overrides: Partial<CommentViewRow> = {}): CommentViewRow => ({
     ...row,
     authorName: null,
+    authorImage: null,
     legacyFirstName: 'Ada',
     legacyLastName: 'Lovelace',
     legacyUsername: 'ada.lovelace3',
@@ -72,6 +81,28 @@ describe('toCommentView', () => {
 
         expect(view).toMatchObject({ likeCount: 4, likedByViewer: true });
         expect(view).not.toHaveProperty('legacyFirstName');
+    });
+
+    it('carries the registered author’s picture and defaults it to null', () => {
+        expect(toCommentView(viewRow({ authorImage: '/api/avatars/user-1' })).authorImage).toBe('/api/avatars/user-1');
+        expect(toCommentView(viewRow()).authorImage).toBeNull();
+    });
+});
+
+describe('toCommentHistoryItem', () => {
+    const historyRow: CommentHistoryRow = { ...row, authorId: 'user-1', userId: null, postTitle: 'Hello', postSlug: 'hello', likeCount: 2 };
+
+    it('maps the comment with its post and like count', () => {
+        expect(toCommentHistoryItem(historyRow)).toEqual({
+            ...toComment(historyRow),
+            postTitle: 'Hello',
+            postSlug: 'hello',
+            likeCount: 2,
+        });
+    });
+
+    it('keeps a missing post as nulls', () => {
+        expect(toCommentHistoryItem({ ...historyRow, postTitle: null, postSlug: null })).toMatchObject({ postTitle: null, postSlug: null });
     });
 });
 

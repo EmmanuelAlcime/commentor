@@ -21,3 +21,10 @@ export class NotCommentAuthorError extends Error {
         this.name = 'NotCommentAuthorError';
     }
 }
+
+export class InvalidAuthorIdError extends Error {
+    constructor(readonly authorId: unknown) {
+        super(`Invalid author id: ${String(authorId)}`);
+        this.name = 'InvalidAuthorIdError';
+    }
+}
