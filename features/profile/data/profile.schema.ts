@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import { mediumblob, mysqlTable, timestamp, varchar } from 'drizzle-orm/mysql-core';
 // Relative path so drizzle-kit can resolve it without the @/ alias
 import { user } from '../../auth/data/auth.schema';
@@ -11,5 +12,5 @@ export const profileImageTable = mysqlTable('profile_image', {
     contentType: varchar('content_type', { length: 64 }).notNull(),
     // Up to 16 MB; uploads are capped well below that in the domain
     data: mediumblob('data', { mode: 'buffer' }).notNull(),
-    updatedAt: timestamp('updated_at', { fsp: 3 }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { fsp: 3 }).default(sql`CURRENT_TIMESTAMP(3)`).notNull(),
 });

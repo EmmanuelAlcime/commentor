@@ -44,7 +44,7 @@ drizzle/
 
 - Node.js 20.9 or newer (developed on Node 24)
 - npm
-- A MySQL 8 server you can reach on port 3306
+- A MySQL-compatible database: a local MySQL 8 server, or a hosted [TiDB Cloud](https://tidbcloud.com) cluster (see [Using TiDB Cloud](#using-tidb-cloud))
 
 ## Running locally
 
@@ -60,9 +60,11 @@ Create a `.env.example` file in the project root with the variables below (it is
 
 ```dotenv
 DATABASE_HOST=localhost
+DATABASE_PORT=3306
 DATABASE_USERNAME=root
 DATABASE_PASSWORD=
 DATABASE_NAME=commenter
+DATABASE_SSL=false
 
 BETTER_AUTH_SECRET=        # openssl rand -base64 32
 BETTER_AUTH_URL=http://localhost:3000
@@ -71,13 +73,15 @@ BETTER_AUTH_URL=http://localhost:3000
 | Variable | Required | Purpose |
 |---|---|---|
 | `DATABASE_HOST` | Yes | MySQL host. The app throws on startup if it is missing |
+| `DATABASE_PORT` | No | MySQL port. Defaults to 3306. TiDB Cloud uses 4000 |
 | `DATABASE_USERNAME` | Yes | MySQL user |
 | `DATABASE_PASSWORD` | Yes | MySQL password (may be empty for a local root user) |
 | `DATABASE_NAME` | Yes | Database name. Create it first: `CREATE DATABASE commenter;` |
+| `DATABASE_SSL` | No | Set to `true` to connect over TLS (required by TiDB Cloud). Off by default |
 | `BETTER_AUTH_SECRET` | Production | Signs session cookies. In development Better Auth falls back to a default and logs a warning |
 | `BETTER_AUTH_URL` | No | Base URL of the app. Inferred from the request when omitted |
 
-The port is hard-coded to 3306 in `drizzle/src/db/index.ts` and `drizzle.config.ts`.
+Both the runtime client (`drizzle/src/db/index.ts`) and `drizzle.config.ts` build their connection from these variables through `drizzle/src/db/connection.ts`, so they always point at the same server.
 
 **Which file is read:** Next.js loads `.env.example` on its own. The CLI scripts (`drizzle-kit` and `npm run db:seed`) load variables through `dotenv/config`, which only reads `.env` by default. Either keep a `.env` with the same values, or point dotenv at the local file as shown in the commands below. All `.env*` files are gitignored.
 
@@ -112,6 +116,34 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+## Using TiDB Cloud
+
+TiDB Cloud is MySQL-compatible, so the app, Drizzle and Better Auth work unchanged. Only the connection settings differ.
+
+1. Create a cluster at [tidbcloud.com](https://tidbcloud.com) (the Starter/Serverless tier is free) and create a database named `commenter` from the SQL editor, or let `drizzle-kit push` run against the default `test` database and set `DATABASE_NAME=test`.
+2. In the cluster overview click **Connect**, choose **General** / **Node.js**, and generate a password. Copy the host, port, and user shown there.
+3. Set the variables:
+
+```dotenv
+DATABASE_HOST=gateway01.<region>.prod.aws.tidbcloud.com
+DATABASE_PORT=4000
+DATABASE_USERNAME=<prefix>.root
+DATABASE_PASSWORD=<generated password>
+DATABASE_NAME=commenter
+DATABASE_SSL=true
+```
+
+TiDB Cloud rejects plain connections, so `DATABASE_SSL=true` is mandatory. The connection verifies the server certificate against the system trust store (TLS 1.2 or newer); no CA bundle needs to be downloaded.
+
+4. Push the schema and seed as in steps 3 and 4 above.
+
+Notes:
+
+- The username keeps the `<prefix>.` part. It tells the TiDB Cloud gateway which cluster you are connecting to.
+- Serverless clusters pause after a period of inactivity. The first query after a pause takes a few seconds while the cluster resumes.
+- Set the same six variables in your hosting provider (for example in the Vercel project's Environment Variables) for production deployments.
+- TiDB rejects `DEFAULT (now())` on `timestamp(3)` columns, which is what Drizzle's `.defaultNow()` emits. The schemas therefore use `.default(sql`CURRENT_TIMESTAMP(3)`)`, which both MySQL 8 and TiDB accept. Keep using that form for new timestamp columns.
 
 ## Scripts
 
