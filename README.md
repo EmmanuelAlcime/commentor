@@ -143,6 +143,7 @@ Notes:
 - The username keeps the `<prefix>.` part. It tells the TiDB Cloud gateway which cluster you are connecting to.
 - Serverless clusters pause after a period of inactivity. The first query after a pause takes a few seconds while the cluster resumes.
 - Set the same six variables in your hosting provider (for example in the Vercel project's Environment Variables) for production deployments.
+- TiDB rejects `DEFAULT (now())` on `timestamp(3)` columns, which is what Drizzle's `.defaultNow()` emits. The schemas therefore use `.default(sql`CURRENT_TIMESTAMP(3)`)`, which both MySQL 8 and TiDB accept. Keep using that form for new timestamp columns.
 
 ## Scripts
 

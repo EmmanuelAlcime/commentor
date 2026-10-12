@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import { index, int, mysqlTable, primaryKey, timestamp, varchar } from 'drizzle-orm/mysql-core'
 // Relative path so drizzle-kit can resolve it without the @/ alias
 import { user } from '../../../features/auth/data/auth.schema'
@@ -52,7 +53,7 @@ export const postLikeTable = mysqlTable(
     {
         postId: int('postId').notNull().references(() => postTable.id, { onDelete: 'cascade' }),
         userId: varchar('userId', { length: 36 }).notNull().references(() => user.id, { onDelete: 'cascade' }),
-        createdAt: timestamp('createdAt', { fsp: 3 }).defaultNow().notNull(),
+        createdAt: timestamp('createdAt', { fsp: 3 }).default(sql`CURRENT_TIMESTAMP(3)`).notNull(),
     },
     (table) => [primaryKey({ columns: [table.postId, table.userId] })],
 )
@@ -62,7 +63,7 @@ export const commentLikeTable = mysqlTable(
     {
         commentId: int('commentId').notNull().references(() => commentsTable.id, { onDelete: 'cascade' }),
         userId: varchar('userId', { length: 36 }).notNull().references(() => user.id, { onDelete: 'cascade' }),
-        createdAt: timestamp('createdAt', { fsp: 3 }).defaultNow().notNull(),
+        createdAt: timestamp('createdAt', { fsp: 3 }).default(sql`CURRENT_TIMESTAMP(3)`).notNull(),
     },
     (table) => [primaryKey({ columns: [table.commentId, table.userId] })],
 )
