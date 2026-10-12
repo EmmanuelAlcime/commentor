@@ -5,9 +5,9 @@ import { useActionState } from "react";
 import { PASSWORD_MIN_LENGTH } from "@/features/auth/domain/entities/auth-user";
 import { registerAction } from "../actions/auth-actions";
 import type { AuthFormState } from "../actions/auth-form-state";
-import { FormAlert } from "./FormAlert";
-import { FormField } from "./FormField";
-import { SubmitButton } from "./SubmitButton";
+import { FormAlert } from "@/shared/presentation/components/ui/FormAlert";
+import { FormField } from "@/shared/presentation/components/ui/FormField";
+import { SubmitButton } from "@/shared/presentation/components/ui/SubmitButton";
 
 const initialState: AuthFormState = {};
 
