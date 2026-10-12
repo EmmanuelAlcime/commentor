@@ -1,6 +1,7 @@
+import { Suspense } from "react";
 import { PostList } from "@/features/posts/presentation/components/PostList";
 import { PostListSkeleton } from "@/features/posts/presentation/components/PostListSkeleton";
-import {Suspense} from "react";
+import { parsePostListParams } from "@/features/posts/presentation/post-list-params";
 
 export default function Home({ searchParams }: PageProps<"/">) {
   return <Suspense fallback={<PostListSkeleton />}>
@@ -9,6 +10,6 @@ export default function Home({ searchParams }: PageProps<"/">) {
 }
 
 async function Posts({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
-  const { page } = await searchParams;
-  return <PostList page={typeof page === "string" ? Number(page) : 1} />;
+  const { page, search, sort } = parsePostListParams(await searchParams);
+  return <PostList page={page} search={search} sort={sort} />;
 }

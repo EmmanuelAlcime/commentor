@@ -18,6 +18,7 @@ const comments = vi.hoisted(() => ({
     unlikeComment: vi.fn(),
 }));
 const refresh = vi.hoisted(() => vi.fn());
+const updateTag = vi.hoisted(() => vi.fn());
 // redirect() throws in Next.js to stop the action; mirror that so code after it never runs
 const redirect = vi.hoisted(() =>
     vi.fn((url: string) => {
@@ -27,7 +28,7 @@ const redirect = vi.hoisted(() =>
 
 vi.mock('@/features/auth/di', () => auth);
 vi.mock('@/features/comments/di', () => comments);
-vi.mock('next/cache', () => ({ refresh }));
+vi.mock('next/cache', () => ({ refresh, updateTag }));
 vi.mock('next/navigation', () => ({ redirect }));
 
 const {
@@ -58,6 +59,7 @@ describe('comment actions', () => {
 
             expect(comments.createComment).toHaveBeenCalledWith({ postId: 3, authorId: 'user-1', content: 'Hello' });
             expect(refresh).toHaveBeenCalledOnce();
+            expect(updateTag).toHaveBeenCalledWith('comments');
             expect(state).toMatchObject({ status: 'success' });
         });
 
@@ -84,6 +86,7 @@ describe('comment actions', () => {
 
             expect(state).toEqual({ status: 'error', error: 'Write something before posting.', content: '   ' });
             expect(refresh).not.toHaveBeenCalled();
+            expect(updateTag).not.toHaveBeenCalled();
         });
 
         it('explains content that is too long', async () => {
@@ -159,6 +162,7 @@ describe('comment actions', () => {
 
             expect(comments.deleteComment).toHaveBeenCalledWith({ commentId: 4, userId: 'user-1' });
             expect(refresh).toHaveBeenCalledOnce();
+            expect(updateTag).toHaveBeenCalledWith('comments');
         });
 
         it('refuses a signed-out user', async () => {
@@ -192,6 +196,7 @@ describe('comment actions', () => {
             expect(comments.likeComment).toHaveBeenCalledWith({ commentId: 4, userId: 'user-1' });
             expect(comments.unlikeComment).not.toHaveBeenCalled();
             expect(refresh).toHaveBeenCalledOnce();
+            expect(updateTag).toHaveBeenCalledWith('comments');
         });
 
         it('unlikes the comment', async () => {

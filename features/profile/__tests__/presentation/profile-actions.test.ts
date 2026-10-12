@@ -15,6 +15,7 @@ const di = vi.hoisted(() => ({
     deleteAccount: vi.fn(),
 }));
 const refresh = vi.hoisted(() => vi.fn());
+const updateTag = vi.hoisted(() => vi.fn());
 // redirect() throws in Next.js to stop the action; mirror that so code after it never runs
 const redirect = vi.hoisted(() =>
     vi.fn((url: string) => {
@@ -24,7 +25,7 @@ const redirect = vi.hoisted(() =>
 
 vi.mock('@/features/auth/di', () => auth);
 vi.mock('@/features/profile/di', () => di);
-vi.mock('next/cache', () => ({ refresh }));
+vi.mock('next/cache', () => ({ refresh, updateTag }));
 vi.mock('next/navigation', () => ({ redirect }));
 
 const {
@@ -235,6 +236,7 @@ describe('deleteAccountAction', () => {
     it('deletes the account and redirects home', async () => {
         await expect(deleteAccountAction(initialProfileFormState, form(fields))).rejects.toThrow('NEXT_REDIRECT:/');
         expect(di.deleteAccount).toHaveBeenCalledWith({ password: 'correct-horse' });
+        expect(updateTag).toHaveBeenCalledWith('comments');
     });
 
     it('requires the confirmation box to be ticked', async () => {
@@ -252,6 +254,7 @@ describe('deleteAccountAction', () => {
             fieldErrors: { password: 'Incorrect password' },
         });
         expect(redirect).not.toHaveBeenCalled();
+        expect(updateTag).not.toHaveBeenCalled();
     });
 
     it('returns field errors from the use case', async () => {

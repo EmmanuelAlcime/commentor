@@ -1,6 +1,6 @@
 'use server';
 
-import { refresh } from 'next/cache';
+import { refresh, updateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/features/auth/di';
 import {
@@ -22,6 +22,12 @@ import { InvalidIdError } from '@/shared/domain/errors';
 import type { CommentActionResult, CommentFormState } from './comment-action-state';
 
 // Ids are bound on the client, so they can be anything; the use cases reject what isn't a valid id
+
+// Post cards show cached comment previews, so every change to comments or their likes expires them
+function commentsChanged() {
+    updateTag('comments');
+    refresh();
+}
 
 const contentOf = (formData: FormData) => {
     const value = formData.get('content');
@@ -54,7 +60,7 @@ async function submit(content: string, mutate: (userId: string) => Promise<unkno
         throw error;
     }
 
-    refresh();
+    commentsChanged();
     return { status: 'success', at: Date.now() };
 }
 
@@ -85,7 +91,7 @@ export async function deleteCommentAction(commentId: number): Promise<CommentAct
         throw error;
     }
 
-    refresh();
+    commentsChanged();
     return { ok: true };
 }
 
@@ -108,5 +114,5 @@ export async function setCommentLikeAction(commentId: number, liked: unknown): P
         if (!(error instanceof CommentNotFoundError)) throw error;
     }
 
-    refresh();
+    commentsChanged();
 }

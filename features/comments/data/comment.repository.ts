@@ -1,9 +1,9 @@
-import { and, desc, eq, getColumns, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, getColumns, inArray, lte, sql } from 'drizzle-orm';
 import { db } from '@/drizzle/src/db';
 import { commentLikeTable, commentsTable, postTable, user, userTable } from '@/drizzle/src/db/schema';
-import type { Comment, CommentHistoryItem, CommentView } from '../domain/entities/comment';
+import type { Comment, CommentHistoryItem, CommentPreview, CommentView } from '../domain/entities/comment';
 import type { CommentRepository, NewComment } from '../domain/repositories/comment-repository';
-import { toComment, toCommentHistoryItem, toCommentView, toStoredDate } from './comment.mapper';
+import { toComment, toCommentHistoryItem, toCommentPreview, toCommentView, toStoredDate } from './comment.mapper';
 
 const likeCount = sql<number>`(select count(*) from ${commentLikeTable} where ${commentLikeTable.commentId} = ${commentsTable.id})`.mapWith(Number);
 
@@ -43,6 +43,35 @@ export class DrizzleCommentRepository implements CommentRepository {
             // createdAt is an ISO string, so lexical order is chronological; id breaks ties
             .orderBy(desc(commentsTable.createdAt), desc(commentsTable.id));
         return rows.map(toCommentHistoryItem);
+    }
+
+    async findTopByPostIds(postIds: number[], limitPerPost: number): Promise<CommentPreview[]> {
+        if (postIds.length === 0) return [];
+        // Rank every comment within its post by likes, then keep the first `limitPerPost` of each
+        const ranked = db
+            .select({
+                ...getColumns(commentsTable),
+                authorName: user.name,
+                authorImage: user.image,
+                legacyFirstName: userTable.firstName,
+                legacyLastName: userTable.lastName,
+                legacyUsername: userTable.username,
+                likeCount: likeCount.as('likeCount'),
+                rank: sql<number>`row_number() over (partition by ${commentsTable.postId} order by ${likeCount} desc, ${commentsTable.createdAt} desc, ${commentsTable.id} desc)`.as(
+                    'rn',
+                ),
+            })
+            .from(commentsTable)
+            .leftJoin(user, eq(user.id, commentsTable.authorId))
+            .leftJoin(userTable, eq(userTable.id, commentsTable.userId))
+            .where(inArray(commentsTable.postId, postIds))
+            .as('ranked');
+        const rows = await db
+            .select()
+            .from(ranked)
+            .where(lte(ranked.rank, limitPerPost))
+            .orderBy(asc(ranked.postId), asc(ranked.rank));
+        return rows.map(toCommentPreview);
     }
 
     async findViewsByPostId(postId: number, viewerId: string | null): Promise<CommentView[]> {

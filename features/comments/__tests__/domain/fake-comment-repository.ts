@@ -1,4 +1,4 @@
-import type { Comment, CommentHistoryItem, CommentView } from '@/features/comments/domain/entities/comment';
+import type { Comment, CommentHistoryItem, CommentPreview, CommentView } from '@/features/comments/domain/entities/comment';
 import type { CommentRepository, NewComment } from '@/features/comments/domain/repositories/comment-repository';
 
 type FakePost = { id: number; title: string | null; slug: string | null };
@@ -61,6 +61,25 @@ export class InMemoryCommentRepository implements CommentRepository {
                     likeCount: this.likeCount(comment.id),
                 };
             });
+    }
+
+    async findTopByPostIds(postIds: number[], limitPerPost: number): Promise<CommentPreview[]> {
+        const time = (comment: Comment) => comment.createdAt?.getTime() ?? 0;
+        return postIds.flatMap((postId) =>
+            this.comments
+                .filter((comment) => comment.postId === postId)
+                .sort((a, b) => this.likeCount(b.id) - this.likeCount(a.id) || time(b) - time(a) || b.id - a.id)
+                .slice(0, limitPerPost)
+                .map((comment) => ({
+                    id: comment.id,
+                    postId,
+                    content: comment.content,
+                    authorName: (comment.authorId && this.authorNames[comment.authorId]) || 'Seeded user',
+                    authorImage: (comment.authorId && this.authorImages[comment.authorId]) || null,
+                    likeCount: this.likeCount(comment.id),
+                    createdAt: comment.createdAt,
+                })),
+        );
     }
 
     async findViewsByPostId(postId: number, viewerId: string | null): Promise<CommentView[]> {

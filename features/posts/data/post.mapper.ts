@@ -14,3 +14,8 @@ export function toPost(row: PostRow): Post {
         createdAt: row.createdAt ? new Date(row.createdAt) : null,
     };
 }
+
+// LIKE pattern for a "contains" search; `%`, `_` and `\` typed by the user are matched literally
+export function toSearchPattern(search: string): string {
+    return `%${search.replace(/[\\%_]/g, '\\$&')}%`;
+}
