@@ -1,0 +1,42 @@
+import { cacheLife, cacheTag } from "next/cache";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { getPostBySlug } from "@/features/posts/di";
+import { PostNotFoundError } from "@/features/posts/domain/errors";
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" });
+
+export async function PostDetail({ slug }: { slug: string }) {
+    "use cache";
+    cacheLife("hours");
+    cacheTag("posts", `post:${slug}`);
+
+    const post = await getPostBySlug(slug).catch((error: unknown) => {
+        if (error instanceof PostNotFoundError) notFound();
+        throw error;
+    });
+
+    return (
+        <article className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+            {post.createdAt && (
+                <time
+                    dateTime={post.createdAt.toISOString()}
+                    className="text-sm font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400"
+                >
+                    {dateFormatter.format(post.createdAt)}
+                </time>
+            )}
+            <h1 className="mt-2 text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+                {post.title ?? "Untitled post"}
+            </h1>
+            {post.image && (
+                <div className="relative mt-8 aspect-[2/1] overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
+                    <Image src={post.image} alt="" fill priority sizes="(min-width: 768px) 768px, 100vw" className="object-cover" />
+                </div>
+            )}
+            {post.content && (
+                <p className="mt-8 text-lg leading-8 text-zinc-700 dark:text-zinc-300">{post.content}</p>
+            )}
+        </article>
+    );
+}

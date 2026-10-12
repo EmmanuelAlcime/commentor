@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:seed": "tsx drizzle/src/db/seed.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "dotenv": "^18.0.7",
@@ -26,6 +28,8 @@
     "eslint-config-next": "^14.2.35",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
   }
 }

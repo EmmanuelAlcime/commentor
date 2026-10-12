@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ClaudeCodeEditorTabs">
-    <option name="activeSessionId" value="da8e7f59-14ae-4225-a72e-659bde212a40" />
+    <option name="activeSessionId" value="9ba9d33f-57f8-448a-9d79-a71a64520b4f" />
     <option name="openSessionIds">
       <list>
         <option value="da8e7f59-14ae-4225-a72e-659bde212a40" />
+        <option value="9ba9d33f-57f8-448a-9d79-a71a64520b4f" />
       </list>
     </option>
     <option name="sessionPaths">
       <map>
-        <entry key="da8e7f59-14ae-4225-a72e-659bde212a40" value="/sessions/new" />
+        <entry key="9ba9d33f-57f8-448a-9d79-a71a64520b4f" value="/sessions/b653ca74-3879-4c87-a377-5e17ec8bb5d9" />
+        <entry key="da8e7f59-14ae-4225-a72e-659bde212a40" value="/sessions/c7ec5a04-cf70-4b5f-b44e-66ece7ab5ef1" />
       </map>
     </option>
     <option name="sessionTitles">
       <map>
-        <entry key="da8e7f59-14ae-4225-a72e-659bde212a40" value="Claude Code" />
+        <entry key="9ba9d33f-57f8-448a-9d79-a71a64520b4f" value="show me how to create pagination for the post" />
+        <entry key="da8e7f59-14ae-4225-a72e-659bde212a40" value="create 100 users and 100 post with 200 comments se" />
       </map>
     </option>
   </component>
