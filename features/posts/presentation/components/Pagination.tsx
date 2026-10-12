@@ -15,7 +15,7 @@ export function Pagination({ page, totalPages }: { page: number; totalPages: num
     const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
     return (
-        <nav aria-label="Pagination" className="mt-12 flex items-center justify-center gap-2">
+        <nav aria-label="Pagination" className="mt-12 flex flex-wrap items-center justify-center gap-2 px-4">
             {page > 1 ? (
                 <Link href={hrefFor(page - 1)} rel="prev" className={linkClass}>
                     Previous
