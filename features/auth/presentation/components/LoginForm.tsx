@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { signInAction } from "../actions/auth-actions";
 import type { AuthFormState } from "../actions/auth-form-state";
-import { FormAlert } from "./FormAlert";
-import { FormField } from "./FormField";
-import { SubmitButton } from "./SubmitButton";
+import { FormAlert } from "@/shared/presentation/components/ui/FormAlert";
+import { FormField } from "@/shared/presentation/components/ui/FormField";
+import { SubmitButton } from "@/shared/presentation/components/ui/SubmitButton";
 
 const initialState: AuthFormState = {};
 

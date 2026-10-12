@@ -44,7 +44,7 @@ export function CommentThread({ node, viewerId, depth, parentAuthorName }: Props
     return (
         <li>
             <article aria-label={`Comment by ${node.authorName}`} className="flex gap-3">
-                <Avatar name={node.authorName} className={isReply ? "size-8 text-xs" : "size-10 text-sm"} />
+                <Avatar name={node.authorName} src={node.authorImage} className={isReply ? "size-8 text-xs" : "size-10 text-sm"} />
                 <div className="min-w-0 flex-1">
                     <header className="flex flex-wrap items-baseline gap-x-1.5 text-sm">
                         <span className="font-semibold text-zinc-900 dark:text-zinc-50">{node.authorName}</span>

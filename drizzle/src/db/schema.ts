@@ -68,3 +68,4 @@ export const commentLikeTable = mysqlTable(
 )
 
 export * from '../../../features/auth/data/auth.schema';
+export * from '../../../features/profile/data/profile.schema';

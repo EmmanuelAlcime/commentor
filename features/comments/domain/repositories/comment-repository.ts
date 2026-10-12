@@ -1,4 +1,4 @@
-import type { Comment, CommentView } from '../entities/comment';
+import type { Comment, CommentHistoryItem, CommentView } from '../entities/comment';
 
 export type NewComment = {
     postId: number;
@@ -11,6 +11,8 @@ export type NewComment = {
 export interface CommentRepository {
     findById(id: number): Promise<Comment | null>;
     findByUserId(userId: number): Promise<Comment[]>;
+    // Everything a registered user has written, newest first, with the post each comment belongs to
+    findHistoryByAuthorId(authorId: string): Promise<CommentHistoryItem[]>;
     // Every comment and reply on the post, flat, with author name and likes as seen by the viewer
     findViewsByPostId(postId: number, viewerId: string | null): Promise<CommentView[]>;
     postExists(postId: number): Promise<boolean>;

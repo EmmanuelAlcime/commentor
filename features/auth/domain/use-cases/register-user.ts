@@ -1,5 +1,6 @@
 import {
     type AuthUser,
+    EMAIL_PATTERN,
     NAME_MAX_LENGTH,
     normalizeEmail,
     PASSWORD_MAX_LENGTH,
@@ -9,39 +10,42 @@ import {
 import { InvalidRegistrationError, type RegistrationFieldErrors } from '../errors';
 import type { AuthRepository } from '../repositories/auth-repository';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 export class RegisterUser {
-    constructor(private readonly auth: AuthRepository) {}
+    // `now` is injectable so tests can pin the acceptance timestamp
+    constructor(
+        private readonly auth: AuthRepository,
+        private readonly now: () => Date = () => new Date(),
+    ) {}
 
     async execute(input: RegistrationInput): Promise<AuthUser> {
-        const registration = {
-            name: input.name.trim(),
-            email: normalizeEmail(input.email),
-            password: input.password,
-        };
+        const name = input.name.trim();
+        const email = normalizeEmail(input.email);
+        const password = input.password;
 
         const fieldErrors: RegistrationFieldErrors = {};
-        if (!registration.name) {
+        if (!name) {
             fieldErrors.name = 'Enter your name';
-        } else if (registration.name.length > NAME_MAX_LENGTH) {
+        } else if (name.length > NAME_MAX_LENGTH) {
             fieldErrors.name = `Name must be ${NAME_MAX_LENGTH} characters or fewer`;
         }
-        if (!EMAIL_PATTERN.test(registration.email)) {
+        if (!EMAIL_PATTERN.test(email)) {
             fieldErrors.email = 'Enter a valid email address';
         }
-        if (registration.password.length < PASSWORD_MIN_LENGTH) {
+        if (password.length < PASSWORD_MIN_LENGTH) {
             fieldErrors.password = `Password must be at least ${PASSWORD_MIN_LENGTH} characters`;
-        } else if (registration.password.length > PASSWORD_MAX_LENGTH) {
+        } else if (password.length > PASSWORD_MAX_LENGTH) {
             fieldErrors.password = `Password must be ${PASSWORD_MAX_LENGTH} characters or fewer`;
         }
-        if (input.confirmPassword !== registration.password) {
+        if (input.confirmPassword !== password) {
             fieldErrors.confirmPassword = 'Passwords do not match';
+        }
+        if (input.acceptTerms !== true) {
+            fieldErrors.acceptTerms = 'You must accept the user agreement to create an account';
         }
         if (Object.keys(fieldErrors).length > 0) {
             throw new InvalidRegistrationError(fieldErrors);
         }
 
-        return this.auth.register(registration);
+        return this.auth.register({ name, email, password, termsAcceptedAt: this.now() });
     }
 }

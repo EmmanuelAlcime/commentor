@@ -1,9 +1,9 @@
 import { and, desc, eq, getColumns, inArray, sql } from 'drizzle-orm';
 import { db } from '@/drizzle/src/db';
 import { commentLikeTable, commentsTable, postTable, user, userTable } from '@/drizzle/src/db/schema';
-import type { Comment, CommentView } from '../domain/entities/comment';
+import type { Comment, CommentHistoryItem, CommentView } from '../domain/entities/comment';
 import type { CommentRepository, NewComment } from '../domain/repositories/comment-repository';
-import { toComment, toCommentView, toStoredDate } from './comment.mapper';
+import { toComment, toCommentHistoryItem, toCommentView, toStoredDate } from './comment.mapper';
 
 const likeCount = sql<number>`(select count(*) from ${commentLikeTable} where ${commentLikeTable.commentId} = ${commentsTable.id})`.mapWith(Number);
 
@@ -29,11 +29,28 @@ export class DrizzleCommentRepository implements CommentRepository {
         return rows.map(toComment);
     }
 
+    async findHistoryByAuthorId(authorId: string): Promise<CommentHistoryItem[]> {
+        const rows = await db
+            .select({
+                ...getColumns(commentsTable),
+                postTitle: postTable.title,
+                postSlug: postTable.slug,
+                likeCount,
+            })
+            .from(commentsTable)
+            .leftJoin(postTable, eq(postTable.id, commentsTable.postId))
+            .where(eq(commentsTable.authorId, authorId))
+            // createdAt is an ISO string, so lexical order is chronological; id breaks ties
+            .orderBy(desc(commentsTable.createdAt), desc(commentsTable.id));
+        return rows.map(toCommentHistoryItem);
+    }
+
     async findViewsByPostId(postId: number, viewerId: string | null): Promise<CommentView[]> {
         const rows = await db
             .select({
                 ...getColumns(commentsTable),
                 authorName: user.name,
+                authorImage: user.image,
                 legacyFirstName: userTable.firstName,
                 legacyLastName: userTable.lastName,
                 legacyUsername: userTable.username,

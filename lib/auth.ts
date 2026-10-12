@@ -16,6 +16,16 @@ export const auth = betterAuth({
         minPasswordLength: PASSWORD_MIN_LENGTH,
         maxPasswordLength: PASSWORD_MAX_LENGTH,
     },
+    user: {
+        additionalFields: {
+            // Set once at sign-up; `input: true` lets signUpEmail accept it, the use case decides the value
+            termsAcceptedAt: { type: "date", required: false, input: true },
+        },
+        // No email provider is configured, so unverified users may change their address directly
+        changeEmail: { enabled: true, updateEmailWithoutVerification: true },
+        // The profile page lets users delete their own account; the password is checked before deleting
+        deleteUser: { enabled: true },
+    },
     // nextCookies must stay last so server actions can set the session cookie
     plugins: [nextCookies()],
 });

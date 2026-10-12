@@ -19,8 +19,17 @@ export type Comment = {
 // A comment as shown to a particular viewer
 export type CommentView = Comment & {
     authorName: string;
+    // Profile picture URL of a registered author; seeded authors have none
+    authorImage: string | null;
     likeCount: number;
     likedByViewer: boolean;
+};
+
+// A comment in its author's own history, with enough of the post to link back to it
+export type CommentHistoryItem = Comment & {
+    postTitle: string | null;
+    postSlug: string | null;
+    likeCount: number;
 };
 
 export const COMMENT_SORTS = ['newest', 'top'] as const;

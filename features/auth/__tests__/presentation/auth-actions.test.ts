@@ -76,8 +76,19 @@ describe('registerAction', () => {
     const fields = { name: 'Jane', email: 'jane@example.com', password: 'correct-horse', confirmPassword: 'correct-horse' };
 
     it('registers and redirects to the callback URL', async () => {
-        await expect(registerAction({}, form({ ...fields, callbackURL: '/my-post' }))).rejects.toThrow('NEXT_REDIRECT:/my-post');
-        expect(di.registerUser).toHaveBeenCalledWith(fields);
+        await expect(registerAction({}, form({ ...fields, acceptTerms: 'on', callbackURL: '/my-post' }))).rejects.toThrow(
+            'NEXT_REDIRECT:/my-post',
+        );
+        expect(di.registerUser).toHaveBeenCalledWith({ ...fields, acceptTerms: true });
+    });
+
+    it('treats a missing agreement checkbox as not accepted', async () => {
+        di.registerUser.mockRejectedValueOnce(new InvalidRegistrationError({ acceptTerms: 'Accept the agreement' }));
+
+        const state = await registerAction({}, form(fields));
+
+        expect(di.registerUser).toHaveBeenCalledWith({ ...fields, acceptTerms: false });
+        expect(state).toMatchObject({ fieldErrors: { acceptTerms: 'Accept the agreement' } });
     });
 
     it('returns field errors and keeps name and email, but not the password', async () => {
