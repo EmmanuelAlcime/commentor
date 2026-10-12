@@ -1,8 +1,10 @@
 import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { ViewTransition } from "react";
 import { getPostBySlug } from "@/features/posts/di";
 import { PostNotFoundError } from "@/features/posts/domain/errors";
+import { postImageTransitionName } from "@/features/posts/presentation/transitions";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" });
 
@@ -30,9 +32,11 @@ export async function PostDetail({ slug }: { slug: string }) {
                 {post.title ?? "Untitled post"}
             </h1>
             {post.image && (
-                <div className="relative mt-8 aspect-[2/1] overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
-                    <Image src={post.image} alt="" fill priority sizes="(min-width: 768px) 768px, 100vw" className="object-cover" />
-                </div>
+                <ViewTransition name={postImageTransitionName(post.id)} share="morph" default="none">
+                    <div className="relative mt-8 aspect-[2/1] overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
+                        <Image src={post.image} alt="" fill priority sizes="(min-width: 768px) 768px, 100vw" className="object-cover" />
+                    </div>
+                </ViewTransition>
             )}
             {post.content && (
                 <p className="mt-8 text-lg leading-8 text-zinc-700 dark:text-zinc-300">{post.content}</p>
