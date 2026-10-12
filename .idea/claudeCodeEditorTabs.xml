@@ -1,20 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ClaudeCodeEditorTabs">
-    <option name="activeSessionId" value="da8e7f59-14ae-4225-a72e-659bde212a40" />
+    <option name="activeSessionId" value="13ecdcb3-f376-44c9-9e84-78d52bbee3e8" />
     <option name="openSessionIds">
       <list>
-        <option value="da8e7f59-14ae-4225-a72e-659bde212a40" />
+        <option value="25ea59e6-60b0-4ee0-8e03-6b0865a4a042" />
+        <option value="ff19df62-69c8-4850-9bc1-998cc04d7e1e" />
+        <option value="13ecdcb3-f376-44c9-9e84-78d52bbee3e8" />
       </list>
     </option>
     <option name="sessionPaths">
       <map>
-        <entry key="da8e7f59-14ae-4225-a72e-659bde212a40" value="/sessions/3ad47333-d74b-42a2-b20e-a5b354b629d2" />
+        <entry key="13ecdcb3-f376-44c9-9e84-78d52bbee3e8" value="/sessions/40257a2e-b3fa-4496-af5c-5ebe2a10edd8" />
+        <entry key="25ea59e6-60b0-4ee0-8e03-6b0865a4a042" value="/sessions/d772420c-0e7d-4fb6-99a2-5dd1761a19f2" />
+        <entry key="ff19df62-69c8-4850-9bc1-998cc04d7e1e" value="/sessions/c5579f08-1ae6-419d-b2ed-01f0b9a94de7" />
       </map>
     </option>
     <option name="sessionTitles">
       <map>
-        <entry key="da8e7f59-14ae-4225-a72e-659bde212a40" value="emmanuel@dev-box  ~/Projects/commenter   featur" />
+        <entry key="13ecdcb3-f376-44c9-9e84-78d52bbee3e8" value="update the @README.md to accurate describe the pr" />
+        <entry key="25ea59e6-60b0-4ee0-8e03-6b0865a4a042" value="merge changes into main" />
+        <entry key="ff19df62-69c8-4850-9bc1-998cc04d7e1e" value="implement new profile feature that allows user to" />
       </map>
     </option>
   </component>
