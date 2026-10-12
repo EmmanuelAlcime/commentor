@@ -1,4 +1,5 @@
 import { headers } from 'next/headers';
+import { connection } from 'next/server';
 import { auth } from '@/lib/auth';
 import { EmailAlreadyRegisteredError } from '@/features/auth/domain/errors';
 import type { Profile } from '../domain/entities/profile';
@@ -8,6 +9,8 @@ import { toProfile, toProfileError } from './profile.mapper';
 // Session cookies are rewritten by the nextCookies plugin, so these must run in a server action or route handler
 export class BetterAuthProfileRepository implements ProfileRepository {
     async getCurrent(): Promise<Profile | null> {
+        // Same reason as BetterAuthRepository.getCurrentUser: the session check reads the clock
+        await connection();
         const session = await auth.api.getSession({ headers: await headers() });
         return session ? toProfile(session.user) : null;
     }

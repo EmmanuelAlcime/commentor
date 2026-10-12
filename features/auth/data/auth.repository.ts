@@ -1,4 +1,5 @@
 import { headers } from 'next/headers';
+import { connection } from 'next/server';
 import { auth } from '@/lib/auth';
 import type { AuthUser, Credentials, Registration } from '../domain/entities/auth-user';
 import type { AuthRepository } from '../domain/repositories/auth-repository';
@@ -32,6 +33,9 @@ export class BetterAuthRepository implements AuthRepository {
     }
 
     async getCurrentUser(): Promise<AuthUser | null> {
+        // Better Auth compares the session expiry against `new Date()`, which Next's prerender validation flags
+        // once a session cookie is present; declaring the read request-bound keeps it out of the static shell
+        await connection();
         const session = await auth.api.getSession({ headers: await headers() });
         return session ? toAuthUser(session.user) : null;
     }
