@@ -34,6 +34,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <UserMenu />
           </Suspense>
         }
+        mobileActions={
+          <Suspense fallback={<div className="h-12" />}>
+            <UserMenu variant="menu" />
+          </Suspense>
+        }
       />
       <main className="flex-1">{children}</main>
       <Footer />
