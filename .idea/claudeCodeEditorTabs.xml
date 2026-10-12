@@ -1,26 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ClaudeCodeEditorTabs">
-    <option name="activeSessionId" value="edc844e3-3958-4f44-a0b6-d833e78cf49f" />
+    <option name="activeSessionId" value="da8e7f59-14ae-4225-a72e-659bde212a40" />
     <option name="openSessionIds">
       <list>
         <option value="da8e7f59-14ae-4225-a72e-659bde212a40" />
-        <option value="9ba9d33f-57f8-448a-9d79-a71a64520b4f" />
-        <option value="edc844e3-3958-4f44-a0b6-d833e78cf49f" />
       </list>
     </option>
     <option name="sessionPaths">
       <map>
-        <entry key="9ba9d33f-57f8-448a-9d79-a71a64520b4f" value="/sessions/b653ca74-3879-4c87-a377-5e17ec8bb5d9" />
         <entry key="da8e7f59-14ae-4225-a72e-659bde212a40" value="/sessions/3ad47333-d74b-42a2-b20e-a5b354b629d2" />
-        <entry key="edc844e3-3958-4f44-a0b6-d833e78cf49f" value="/sessions/9f778180-4732-406c-b8c9-936075f568a8" />
       </map>
     </option>
     <option name="sessionTitles">
       <map>
-        <entry key="9ba9d33f-57f8-448a-9d79-a71a64520b4f" value="show me how to create pagination for the post" />
         <entry key="da8e7f59-14ae-4225-a72e-659bde212a40" value="emmanuel@dev-box  ~/Projects/commenter   featur" />
-        <entry key="edc844e3-3958-4f44-a0b6-d833e78cf49f" value="implement a loading skeleton for the post ui and p" />
       </map>
     </option>
   </component>
