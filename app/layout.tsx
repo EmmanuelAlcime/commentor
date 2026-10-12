@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import Header from "@/shared/presentation/components/Header";
 import Footer from "@/shared/presentation/components/Footer";
+import { UserMenu } from "@/features/auth/presentation/components/UserMenu";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +28,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-      <Header />
+      <Header
+        actions={
+          <Suspense fallback={<div className="h-9 w-36" />}>
+            <UserMenu />
+          </Suspense>
+        }
+      />
       <main className="flex-1">{children}</main>
       <Footer />
       </body>

@@ -34,3 +34,6 @@ export const commentsTable = mysqlTable(
         createdAt: varchar('createdAt', { length: 255 }),
     }
 )
+
+// Relative path so drizzle-kit can resolve it without the @/ alias
+export * from '../../../features/auth/data/auth.schema';
