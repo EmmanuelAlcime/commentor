@@ -136,7 +136,14 @@ DATABASE_SSL=true
 
 TiDB Cloud rejects plain connections, so `DATABASE_SSL=true` is mandatory. The connection verifies the server certificate against the system trust store (TLS 1.2 or newer); no CA bundle needs to be downloaded.
 
-4. Push the schema and seed as in steps 3 and 4 above.
+4. On a brand-new cluster, push the schema and seed as in steps 3 and 4 above, then record the existing migrations as applied so that `drizzle-kit migrate` works from then on (the migration chain cannot build an empty database because the first migration is a baseline):
+
+```bash
+npx drizzle-kit push
+npm run db:seed
+```
+
+The shared TiDB Cloud database already has this done: its `__drizzle_migrations` table lists every migration in `drizzle/migrations`. From now on, apply schema changes to it with `npx drizzle-kit generate` followed by `npx drizzle-kit migrate`, not with `push`, so the tracking table stays in step with the migration files.
 
 Notes:
 
