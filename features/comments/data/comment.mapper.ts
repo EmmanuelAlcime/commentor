@@ -1,10 +1,10 @@
 import type { commentsTable } from '@/drizzle/src/db/schema';
-import type { Comment, CommentHistoryItem, CommentView } from '../domain/entities/comment';
+import type { Comment, CommentHistoryItem, CommentPreview, CommentView } from '../domain/entities/comment';
 
 export type CommentRow = typeof commentsTable.$inferSelect;
 
-// A comment row joined with both possible authors and its like counts
-export type CommentViewRow = CommentRow & {
+// Both possible authors of a comment, joined onto its row
+export type AuthorColumns = {
     // Better Auth user (registered author)
     authorName: string | null;
     authorImage: string | null;
@@ -12,9 +12,17 @@ export type CommentViewRow = CommentRow & {
     legacyFirstName: string | null;
     legacyLastName: string | null;
     legacyUsername: string | null;
-    likeCount: number;
-    likedByViewer: boolean;
 };
+
+// A comment row joined with both possible authors and its like counts
+export type CommentViewRow = CommentRow &
+    AuthorColumns & {
+        likeCount: number;
+        likedByViewer: boolean;
+    };
+
+// A comment row joined with its authors and like count, as selected for post card previews
+export type CommentPreviewRow = CommentRow & AuthorColumns & { likeCount: number };
 
 // A comment row joined with the post it was written on
 export type CommentHistoryRow = CommentRow & {
@@ -41,7 +49,7 @@ export function toComment(row: CommentRow): Comment {
     };
 }
 
-function authorName(row: CommentViewRow): string {
+function authorName(row: AuthorColumns): string {
     if (row.authorName) return row.authorName;
     const legacyName = [row.legacyFirstName, row.legacyLastName].filter(Boolean).join(' ');
     return legacyName || row.legacyUsername || UNKNOWN_AUTHOR;
@@ -54,6 +62,20 @@ export function toCommentView(row: CommentViewRow): CommentView {
         authorImage: row.authorImage ?? null,
         likeCount: row.likeCount,
         likedByViewer: row.likedByViewer,
+    };
+}
+
+// Previews of a seeded comment have no post to point at only when postId is null, which the query excludes
+export function toCommentPreview(row: CommentPreviewRow): CommentPreview {
+    return {
+        id: row.id,
+        postId: row.postId ?? 0,
+        content: row.content,
+        authorName: authorName(row),
+        authorImage: row.authorImage ?? null,
+        // Comes back through a subquery, where the driver may hand it over as a string
+        likeCount: Number(row.likeCount),
+        createdAt: row.createdAt ? new Date(row.createdAt) : null,
     };
 }
 

@@ -1,4 +1,5 @@
 import type { Post } from '@/features/posts/domain/entities/post';
+import { DEFAULT_POST_QUERY, type PostQuery } from '@/features/posts/domain/entities/post-query';
 import type { PostRepository } from '@/features/posts/domain/repositories/post-repository';
 
 export class InMemoryPostRepository implements PostRepository {
@@ -8,12 +9,20 @@ export class InMemoryPostRepository implements PostRepository {
         return [...this.posts];
     }
 
-    async findPage(limit: number, offset: number): Promise<Post[]> {
-        return this.posts.slice(offset, offset + limit);
+    private matching(query: PostQuery): Post[] {
+        const needle = query.search.toLowerCase();
+        const time = (post: Post) => post.createdAt?.getTime() ?? 0;
+        return this.posts
+            .filter((post) => !needle || `${post.title ?? ''} ${post.content ?? ''}`.toLowerCase().includes(needle))
+            .sort((a, b) => (query.sort === 'oldest' ? time(a) - time(b) || a.id - b.id : time(b) - time(a) || b.id - a.id));
     }
 
-    async count(): Promise<number> {
-        return this.posts.length;
+    async findPage(limit: number, offset: number, query: PostQuery = DEFAULT_POST_QUERY): Promise<Post[]> {
+        return this.matching(query).slice(offset, offset + limit);
+    }
+
+    async count(query: PostQuery = DEFAULT_POST_QUERY): Promise<number> {
+        return this.matching(query).length;
     }
 
     async findById(id: number): Promise<Post | null> {

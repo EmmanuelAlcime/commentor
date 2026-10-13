@@ -7,9 +7,14 @@ const activeClass =
 const disabledClass =
     "rounded-lg border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-400 dark:border-zinc-800 dark:text-zinc-600";
 
-const hrefFor = (page: number) => (page === 1 ? "/" : `/?page=${page}`);
+type Props = {
+    page: number;
+    totalPages: number;
+    // Builds the link for a page so the caller can keep its own query string (search, sort)
+    hrefFor: (page: number) => string;
+};
 
-export function Pagination({ page, totalPages }: { page: number; totalPages: number }) {
+export function Pagination({ page, totalPages, hrefFor }: Props) {
     if (totalPages <= 1) return null;
 
     const pages = Array.from({ length: totalPages }, (_, i) => i + 1);

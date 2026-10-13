@@ -6,7 +6,7 @@ Built with Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Drizzl
 
 ## Features
 
-- **Posts:** paginated list on the home page, detail page at `/<slug>` with image, breadcrumbs and a shared-element transition from the list.
+- **Posts:** paginated list on the home page with search by title or content (`?q=`) and newest or oldest ordering (`?sort=`), detail page at `/<slug>` with image, breadcrumbs and a shared-element transition from the list. Each card previews the two most-liked comments on the post.
 - **Likes:** signed-in users can like and unlike posts and comments.
 - **Comments:** create, edit and delete your own comments, reply to any comment (replies nest without limit), sort the thread.
 - **Auth:** register and log in with email and password at `/register` and `/login`. Registration requires accepting the user agreement at `/terms`. Sessions are cookie based and handled by Better Auth under `/api/auth/*`.

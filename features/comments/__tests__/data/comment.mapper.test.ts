@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
     type CommentHistoryRow,
+    type CommentPreviewRow,
     type CommentViewRow,
     toComment,
     toCommentHistoryItem,
+    toCommentPreview,
     toCommentView,
     toStoredDate,
     UNKNOWN_AUTHOR,
@@ -103,6 +105,46 @@ describe('toCommentHistoryItem', () => {
 
     it('keeps a missing post as nulls', () => {
         expect(toCommentHistoryItem({ ...historyRow, postTitle: null, postSlug: null })).toMatchObject({ postTitle: null, postSlug: null });
+    });
+});
+
+describe('toCommentPreview', () => {
+    const previewRow: CommentPreviewRow = {
+        ...row,
+        authorId: 'user-1',
+        userId: null,
+        authorName: 'Grace Hopper',
+        authorImage: '/api/avatars/user-1',
+        legacyFirstName: null,
+        legacyLastName: null,
+        legacyUsername: null,
+        likeCount: 3,
+    };
+
+    it('keeps only what a card needs', () => {
+        expect(toCommentPreview(previewRow)).toEqual({
+            id: 1,
+            postId: 2,
+            content: 'Great post!',
+            authorName: 'Grace Hopper',
+            authorImage: '/api/avatars/user-1',
+            likeCount: 3,
+            createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        });
+    });
+
+    it('falls back to the seeded author and coerces a string like count', () => {
+        const preview = toCommentPreview({
+            ...previewRow,
+            authorId: null,
+            userId: 3,
+            authorName: null,
+            authorImage: null,
+            legacyUsername: 'ada',
+            likeCount: '7' as unknown as number,
+        });
+
+        expect(preview).toMatchObject({ authorName: 'ada', authorImage: null, likeCount: 7 });
     });
 });
 

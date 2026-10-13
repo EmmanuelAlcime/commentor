@@ -25,6 +25,17 @@ export type CommentView = Comment & {
     likedByViewer: boolean;
 };
 
+// A short, read-only view of a comment for post cards: who said it and how liked it is
+export type CommentPreview = {
+    id: number;
+    postId: number;
+    content: string | null;
+    authorName: string;
+    authorImage: string | null;
+    likeCount: number;
+    createdAt: Date | null;
+};
+
 // A comment in its author's own history, with enough of the post to link back to it
 export type CommentHistoryItem = Comment & {
     postTitle: string | null;

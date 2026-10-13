@@ -1,6 +1,6 @@
 'use server';
 
-import { refresh } from 'next/cache';
+import { refresh, updateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/features/auth/di';
 import { EmailAlreadyRegisteredError, UnauthenticatedError } from '@/features/auth/domain/errors';
@@ -140,5 +140,7 @@ export async function deleteAccountAction(_previous: ProfileFormState, formData:
         throw err;
     }
 
+    // The account's comments and likes went with it, so cached post card previews must not show them
+    updateTag('comments');
     redirect('/');
 }

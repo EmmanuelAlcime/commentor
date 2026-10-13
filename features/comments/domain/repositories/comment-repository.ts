@@ -1,4 +1,4 @@
-import type { Comment, CommentHistoryItem, CommentView } from '../entities/comment';
+import type { Comment, CommentHistoryItem, CommentPreview, CommentView } from '../entities/comment';
 
 export type NewComment = {
     postId: number;
@@ -15,6 +15,8 @@ export interface CommentRepository {
     findHistoryByAuthorId(authorId: string): Promise<CommentHistoryItem[]>;
     // Every comment and reply on the post, flat, with author name and likes as seen by the viewer
     findViewsByPostId(postId: number, viewerId: string | null): Promise<CommentView[]>;
+    // Up to `limitPerPost` most-liked comments (replies included) for each post, ties broken by newest first
+    findTopByPostIds(postIds: number[], limitPerPost: number): Promise<CommentPreview[]>;
     postExists(postId: number): Promise<boolean>;
     create(comment: NewComment): Promise<Comment>;
     updateContent(id: number, content: string, editedAt: Date): Promise<void>;
