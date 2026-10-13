@@ -63,7 +63,7 @@ const PostItems = ({ post, previews = [] }: { post: Post; previews?: CommentPrev
                         {dateFormatter.format(post.createdAt)}
                     </time>
                 )}
-                <h3 className="text-lg font-semibold leading-snug text-zinc-900 group-hover:underline dark:text-zinc-50">
+                <h3 className="text-lg font-semibold leading-snug text-zinc-900 dark:text-zinc-50">
                     {title}
                 </h3>
                 {post.content && (
