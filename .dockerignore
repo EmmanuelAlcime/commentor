@@ -1,0 +1,31 @@
+# Dependencies and build output are produced inside the image
+node_modules
+.next
+out
+build
+coverage
+*.tsbuildinfo
+
+# Secrets stay out of the image; pass them at runtime instead
+.env*
+
+# Tooling and editor state
+.git
+.gitignore
+.idea
+.vercel
+.vscode
+.DS_Store
+npm-debug.log*
+
+# Docker files themselves
+Dockerfile
+compose.yaml
+.dockerignore
+
+# Docs and tests are not needed at runtime
+README.md
+AGENTS.md
+**/__tests__
+vitest.config.ts
+eslint.config.mjs

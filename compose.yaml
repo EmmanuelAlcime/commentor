@@ -1,0 +1,73 @@
+# Runs the app together with a local MySQL 8 database.
+#
+#   docker compose up --build            # build the image and start app + db
+#   docker compose run --rm db-setup     # first run only: create the schema and seed sample data
+#
+# Compose reads `.env` from this directory for the ${...} values below, so
+# BETTER_AUTH_SECRET comes from your existing .env. The database settings are
+# fixed here and point at the `db` service, not at the values in .env.
+#
+# To run the image against another database (for example TiDB Cloud) without
+# the bundled MySQL, use `docker run --env-file .env -p 3000:3000 commenter` instead.
+
+services:
+  app:
+    build: .
+    image: commenter
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: "3306"
+      DATABASE_USERNAME: commenter
+      DATABASE_PASSWORD: commenter
+      DATABASE_NAME: commenter
+      DATABASE_SSL: "false"
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env (openssl rand -base64 32)}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # One-shot helper built from the `builder` stage, which still has drizzle-kit,
+  # tsx and the source tree. Pushes the schema and seeds the database.
+  db-setup:
+    build:
+      context: .
+      target: builder
+    profiles:
+      - setup
+    command: sh -c "npx drizzle-kit push --force && npm run db:seed"
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: "3306"
+      DATABASE_USERNAME: commenter
+      DATABASE_PASSWORD: commenter
+      DATABASE_NAME: commenter
+      DATABASE_SSL: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: commenter
+      MYSQL_USER: commenter
+      MYSQL_PASSWORD: commenter
+    # Published on 3307 so it does not clash with a MySQL already running on the host
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  db-data:

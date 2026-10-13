@@ -46,6 +46,8 @@ drizzle/
 - npm
 - A MySQL-compatible database: a local MySQL 8 server, or a hosted [TiDB Cloud](https://tidbcloud.com) cluster (see [Using TiDB Cloud](#using-tidb-cloud))
 
+Alternatively, skip Node and the database entirely and use [Docker](#running-with-docker).
+
 ## Running locally
 
 ### 1. Install dependencies
@@ -116,6 +118,34 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+## Running with Docker
+
+The repo ships a multi-stage `Dockerfile` that builds the app with `output: "standalone"` and a `compose.yaml` that runs it next to a MySQL 8 container. Docker Desktop (or any Docker Engine with Compose v2) is the only requirement; Node.js is not needed on the host.
+
+### App + local MySQL with Compose
+
+Compose reads `.env` for `BETTER_AUTH_SECRET` and (optionally) `BETTER_AUTH_URL`. The database settings in `compose.yaml` are fixed and point at the bundled `db` service, so the `DATABASE_*` values in `.env` are ignored here.
+
+```bash
+docker compose up --build          # build the image, start MySQL, then the app
+docker compose run --rm db-setup   # first run only: push the schema and seed sample data
+```
+
+Open [http://localhost:3000](http://localhost:3000). Data persists in the `db-data` volume across restarts. The MySQL container is published on `127.0.0.1:3307` (not 3306, to avoid clashing with a MySQL already on the host), so host tools can reach it with user `commenter`, password `commenter`, database `commenter`.
+
+`db-setup` is a one-shot service built from the Dockerfile's `builder` stage, which still has `drizzle-kit` and `tsx`. Rerun it whenever you want to reset the sample data. Stop everything with `docker compose down`, or `docker compose down -v` to also drop the database volume.
+
+### App only, against an existing database
+
+To run the image against TiDB Cloud or any other MySQL server, build it and pass the same variables as in [Configure environment variables](#2-configure-environment-variables):
+
+```bash
+docker build -t commenter .
+docker run --rm -p 3000:3000 --env-file .env commenter
+```
+
+The runtime image never contains `.env` (it is excluded by `.dockerignore`); credentials are read from the container environment at start-up. `next build` runs without database credentials and only logs Better Auth warnings about the missing secret, which is expected. The server listens on `0.0.0.0:3000`; override with `PORT` and `HOSTNAME`.
 
 ## Using TiDB Cloud
 
